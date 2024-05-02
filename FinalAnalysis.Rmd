@@ -1,0 +1,79 @@
+---
+title: "210 FINAL PROJECT: DATA SCRAPING AND ANALYSIS"
+author: "Joshua Levy"
+format: pdf
+---
+
+```{r important-packages, message = F, warning = F}
+library(tidyverse)
+library(broom)
+
+jobs <- read_csv("EnvEng500.csv")
+
+jobs <- jobs %>%
+  mutate(
+    years_of_experience = na_if(years_of_experience, "X")  # Replace 'X' with NA
+  ) %>%
+  mutate(
+    years_of_experience = as.numeric(years_of_experience)  # Convert to numeric
+  ) %>%
+  filter(!is.na(years_of_experience))  # Remove rows where years_of_experience is NA
+
+
+jobs <- jobs %>%
+  mutate(
+    education_requirements = na_if(education_requirements, "X"),
+  ) %>%
+  filter(!is.na(years_of_experience))  # Remove rows where years_of_experience is NA
+
+jobs <- jobs %>%
+  mutate(
+    average_salary = (Salary_Low + Salary_High) / 2,
+    education_requirements = as.factor(education_requirements),
+    Company_Size = as.factor(Company_Size),
+    Company_Revenue = as.factor(Company_Revenue),
+    Company_Type = as.factor(Company_Type)
+  )
+average_salary_overall <- mean(jobs$average_salary, na.rm = TRUE)
+print(sprintf("Average salary offer: %.3f", average_salary_overall))
+
+```
+
+
+```{r Q1, warning = F}
+model <- lm(average_salary ~ education_requirements + years_of_experience + Company_Size + Company_Revenue, data = jobs)
+
+summary(model)
+
+# Diagnostics
+library(ggplot2)
+model %>% 
+  augment() %>%
+  ggplot(aes(.fitted, .resid)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Residuals vs Fitted", x = "Fitted Values", y = "Residuals")
+
+# QQ plot for normality
+qqnorm(resid(model))
+qqline(resid(model))
+```
+
+
+```{r Q1, warning = F}
+interaction_model <- lm(average_salary ~ education_requirements * years_of_experience + Company_Size + Company_Revenue, data = jobs)
+
+summary(interaction_model)
+
+```
+```{r Q1, warning = F}
+model_sum <- tidy(model)
+interaction_model_sum <- tidy(interaction_model)
+
+# Print summaries for review
+print(model_sum)
+print(interaction_model_sum)
+
+
+```
+
