@@ -7,40 +7,38 @@ format: pdf
 ```{r important-packages, message = F, warning = F}
 library(tidyverse)
 library(broom)
+library(nnet)
 
-jobs <- read_csv("EnvEng500.csv")
-
-jobs <- jobs %>%
-  mutate(
-    years_of_experience = na_if(years_of_experience, "X")  # Replace 'X' with NA
-  ) %>%
-  mutate(
-    years_of_experience = as.numeric(years_of_experience)  # Convert to numeric
-  ) %>%
-  filter(!is.na(years_of_experience))  # Remove rows where years_of_experience is NA
-
+jobs <- read_csv("Clean Data/EnvEng500.csv")
 
 jobs <- jobs %>%
   mutate(
-    education_requirements = na_if(education_requirements, "X"),
+    years_of_experience = na_if(years_of_experience, "X"),  
+    years_of_experience = as.numeric(years_of_experience) 
   ) %>%
-  filter(!is.na(years_of_experience))  # Remove rows where years_of_experience is NA
+  filter(!is.na(years_of_experience))  
+
+jobs <- jobs %>%
+  mutate(education_requirements = na_if(education_requirements, "X")) %>%
+  filter(!is.na(education_requirements))
 
 jobs <- jobs %>%
   mutate(
     average_salary = (Salary_Low + Salary_High) / 2,
-    education_requirements = as.factor(education_requirements),
-    Company_Size = as.factor(Company_Size),
-    Company_Revenue = as.factor(Company_Revenue),
+    education_requirements = relevel(as.factor(education_requirements), ref = "High school diploma"),
+    Company_Size = relevel(as.factor(Company_Size), ref = "1 to 50 Employees"),
+    Company_Revenue = relevel(as.factor(Company_Revenue), ref = "Less than $1 million (USD)"),  
     Company_Type = as.factor(Company_Type)
   )
+
 average_salary_overall <- mean(jobs$average_salary, na.rm = TRUE)
 print(sprintf("Average salary offer: %.3f", average_salary_overall))
+
 
 ```
 
 
-```{r Q1, warning = F}
+```{r linear-model, warning = F}
 model <- lm(average_salary ~ education_requirements + years_of_experience + Company_Size + Company_Revenue, data = jobs)
 
 summary(model)
@@ -60,13 +58,14 @@ qqline(resid(model))
 ```
 
 
-```{r Q1, warning = F}
+```{r interaction-model, warning = F}
 interaction_model <- lm(average_salary ~ education_requirements * years_of_experience + Company_Size + Company_Revenue, data = jobs)
 
 summary(interaction_model)
 
 ```
-```{r Q1, warning = F}
+
+```{r comparison, warning = F}
 model_sum <- tidy(model)
 interaction_model_sum <- tidy(interaction_model)
 
@@ -76,4 +75,11 @@ print(interaction_model_sum)
 
 
 ```
+```{r multinomial, warning = F}
+multinom_model <- multinom(education_requirements ~ years_of_experience + Company_Size + Company_Revenue, data = jobs)
+summary(multinom_model)
 
+coefs <- coef(summary(multinom_model))
+exp(coefs)
+
+```
