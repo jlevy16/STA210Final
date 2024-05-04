@@ -1,7 +1,7 @@
 # STA210Final
 This is the repository for my STA210 Final Project
 
-For this project, I design a web scraping application that allows me to collect job data. In total, I collected around 20,000 entries. After removing all incomplete, faulty, and duplicate data, I was left with 7,000 relevant entries. Unfortunately, GitHub would not allow me to use this CSV file, because .
+For this project, I design a web scraping application that allows me to collect job data. In total, I collected around 20,000 entries. After removing all incomplete, faulty, and duplicate data, I was left with 7,000 relevant entries. Unfortunately, GitHub would not allow me to use this CSV file because of its size. Here is the dataset if you are interested: https://drive.google.com/file/d/14Gx2Ct4VTxE5MnpD7PRUu-JTK45ilrpD/view?usp=sharing
 
 The issue with this data, however, is that the more interesting parameters (required level of education, required experience, required skills, domain, etc) are not easily extricable from this dataset. Instead, they are embedded in lengthy text based job descriptions that have no standard for formatting. I tried to implement a variety of basic NLP methodologies to reliably extract these data points (sentiment analysis, named entity recognition, regex, etc), but each of them were insufficient, and seemed to introduce a form of bias in their preference to certain companies job description formatting. 
 
